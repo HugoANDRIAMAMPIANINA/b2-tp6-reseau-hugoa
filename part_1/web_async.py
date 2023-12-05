@@ -37,7 +37,7 @@ async def main():
     write_task = write_content(content, file_path)
     
     tasks = [ content_task, write_task ]
-    await asyncio.gather(*tasks)
+    asyncio.gather(*tasks)
     
     
 if __name__ == "__main__":
