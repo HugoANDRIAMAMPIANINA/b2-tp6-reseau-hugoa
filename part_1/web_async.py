@@ -31,8 +31,10 @@ async def main():
     url = argv[1]
     file_path = "/tmp/web_page"
     
-    content_task = await get_content(url)
-    await write_content(await content_task, file_path)
+    content_task = get_content(url)
+    write_task = write_content(await content_task, file_path)
+    tasks = [ content_task, write_task ]
+    await asyncio.gather(*tasks)
     
     
 if __name__ == "__main__":
