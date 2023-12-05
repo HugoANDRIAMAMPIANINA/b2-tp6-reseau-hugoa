@@ -12,7 +12,7 @@ def get_content(url: str):
 
 def write_content(content, file):
     try:
-        with open(file, "wb") as web_page_file:
+        with open(file, "w") as web_page_file:
             web_page_file.write(content)
     except Exception as e:
         print(e)
