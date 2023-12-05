@@ -8,7 +8,6 @@ async def get_content(url: str):
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
                 content = await resp.read()
-                print(content)
                 return content
 
     except Exception as e:
@@ -20,6 +19,7 @@ async def write_content(content, file_path):
         async with aiofiles.open(file_path, "w") as web_page_file:
             await web_page_file.write(content)
     except Exception as e:
+        print("Problem here")
         print(e)
     
 async def main():   
