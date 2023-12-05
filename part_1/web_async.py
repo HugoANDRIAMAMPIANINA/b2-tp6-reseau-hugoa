@@ -26,15 +26,15 @@ async def main():
      
     if len(argv) < 2:
         print("Veuillez entrer un url en argument")
-        exit(0)        
+        exit(0)
 
     url = argv[1]
     file_path = "/tmp/web_page"
     
     content_task = get_content(url)
     write_task = write_content(await content_task, file_path)
-    tasks = [ content_task, write_task ]
-    await asyncio.gather(*tasks)
+    
+    await asyncio.gather(content_task, write_task)
     
     
 if __name__ == "__main__":
