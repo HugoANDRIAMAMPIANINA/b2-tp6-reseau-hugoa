@@ -1,13 +1,13 @@
 from sys import argv
-from urllib.request import urlopen
+import requests
 
 def get_content(url: str):
-    try:
-        with urlopen(url) as response:
-            content = response.read().decode('utf-8')
-            return content
-    except Exception as e:
-        print(e)
+    response = requests.get(url)
+    if response.status_code == 200:
+        content = response.content
+        return content
+    else:
+        print(f"Le contenu de cette url n'a pas pu être récupéré : {response.status_code}")
         return None
 
 def write_content(content, file_path):
@@ -40,9 +40,7 @@ def main():
     
     for url in urls:
         content = get_content(url)
-        if content == None:
-            print("Le contenu de cette url n'a pas pu être récupéré")
-        else:
+        if content is not None:
             if "http://" in url:
                 url = url.replace('http://', '')
             elif "https://" in url:
