@@ -45,7 +45,7 @@ def main():
                 url = url.replace('http://', '')
             elif "https://" in url:
                 url = url.replace('https://', '')
-            file_path = f"/tmp/web-{url}"
+            file_path = f"/tmp/web_{url}"
             print(file_path)
             write_content(content, file_path)
 
