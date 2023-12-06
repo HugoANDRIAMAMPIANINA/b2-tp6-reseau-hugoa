@@ -51,7 +51,6 @@ async def main():
             elif "https://" in url:
                 url = url.replace('https://', '')
             file_path = f"/tmp/web_{url}"
-            print(file_path)
             await write_content(content, file_path)
 
 if __name__ == "__main__":
