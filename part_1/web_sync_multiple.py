@@ -1,4 +1,5 @@
 from sys import argv
+from time import perf_counter
 import requests
 
 def get_content(url: str):
@@ -49,4 +50,7 @@ def main():
             write_content(content, file_path)
 
 if __name__ == "__main__":
+    time_start = perf_counter()
     main()
+    time_stop = perf_counter()
+    print(f"Temps d'execution du script en secondes : {time_stop-time_start}")
