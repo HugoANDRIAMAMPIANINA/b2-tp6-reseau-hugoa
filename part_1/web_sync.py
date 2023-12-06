@@ -18,7 +18,7 @@ def write_content(content, file_path):
         print(e)
 
 
-if len(argv) < 2:
+if len(argv) != 2:
     print("Veuillez entrer un url en argument")
     exit(0)
     

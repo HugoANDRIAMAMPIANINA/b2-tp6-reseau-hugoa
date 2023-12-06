@@ -30,7 +30,7 @@ def get_urls_from_file(url_file_path):
         return None
 
 def main():
-    if len(argv) < 2:
+    if len(argv) != 2:
         print("Veuillez entrer le chemin d'un fichier contenant un ou plusieurs urls en argument")
         exit(0)
         
@@ -46,7 +46,6 @@ def main():
             elif "https://" in url:
                 url = url.replace('https://', '')
             file_path = f"/tmp/web_{url}"
-            print(file_path)
             write_content(content, file_path)
 
 if __name__ == "__main__":
