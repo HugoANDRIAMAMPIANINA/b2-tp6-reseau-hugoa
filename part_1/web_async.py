@@ -6,8 +6,13 @@ import aiofiles
 async def get_content(url: str):
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                return resp.read()
+            async with session.get(url) as response:
+                if response.status == 200:
+                    content = await response.read()
+                    return content
+                else:
+                    print(f"Une erreur est survenue : {response.status}")
+                    return None
 
     except Exception as e:
         print(e)
