@@ -18,22 +18,22 @@ async def write_content(content, file_path):
         async with aiofiles.open(file_path, "wb") as web_page_file:
             await web_page_file.write(content)
     except Exception as e:
-        print("Problem here")
         print(e)
+        exit(1)
     
-async def main():   
-     
-    if len(argv) < 2:
+async def main():
+    if len(argv) != 2:
         print("Veuillez entrer un url en argument")
-        exit(0)
+        exit(1)
 
     url = argv[1]
     file_path = "/tmp/web_page"
-
-    write_task = write_content(await get_content(url), file_path)
     
-    tasks = [ write_task ]
-    asyncio.gather(*tasks)
+    content = await get_content(url)
+    if content is not None:
+        await write_content(content, file_path)
+    else:
+        exit(0)
     
     
 if __name__ == "__main__":
