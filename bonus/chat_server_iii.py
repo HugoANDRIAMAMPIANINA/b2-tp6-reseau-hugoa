@@ -50,7 +50,7 @@ async def handle_client_msg(reader, writer):
         CLIENTS[id]["connected"] = True
         colored_pseudo = colored(pseudo, CLIENTS[id]["color"], attrs=['bold'])    
         
-        writer.write(f"Welcome back {colored_pseudo} !")
+        writer.write(f"Welcome back {colored_pseudo} !".encode())
         await writer.drain()
         
         print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom")
@@ -78,7 +78,7 @@ async def handle_client_msg(reader, writer):
         print(f"{formatted_time} Message reçu de {colored_pseudo} ({client_host}:{client_port}) : {message}")
         
         for client_id in CLIENTS:
-            if client_id != addr:
+            if client_id != id:
                 CLIENTS[client_id]["w"].write(f"{formatted_time} {colored_pseudo} a dit : {message}".encode())
                 await CLIENTS[client_id]["w"].drain()
 
