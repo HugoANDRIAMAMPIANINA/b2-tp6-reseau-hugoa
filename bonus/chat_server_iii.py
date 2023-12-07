@@ -67,9 +67,10 @@ async def handle_client_msg(reader, writer):
         
         current_datetime = datetime.now()
         formatted_time = current_datetime.strftime('[%H:%M]')
-
+        print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est déconnecté de la chatroom")
         if data == b'':
             CLIENTS[id]["connected"] = False
+            
             for client_id in CLIENTS:
                 if CLIENTS[client_id]["connected"]:
                     CLIENTS[client_id]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom".encode())
