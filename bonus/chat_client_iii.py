@@ -9,7 +9,7 @@ PORT = 8888
 
 async def async_input(writer):
     while True:
-        user_message = await ainput("Entrez votre message :\n")
+        user_message = await ainput("")
         if user_message == "":
             continue
         

@@ -16,52 +16,71 @@ async def handle_client_msg(reader, writer):
     if data.decode()[:5] == "Hello":
         pseudo = data.decode()[6:]
     
-    colors = ["red", "green", "yellow", "blue", "magenta", "cyan"]
     addr = writer.get_extra_info('peername')
-    if addr not in CLIENTS.keys():
-        CLIENTS[addr] = {}
-        CLIENTS[addr]["r"] = reader
-        CLIENTS[addr]["w"] = writer
-        CLIENTS[addr]["pseudo"] = pseudo
-        CLIENTS[addr]["color"] = choice(colors)
-        
-    color = CLIENTS[addr]["color"]
+    
     client_host, client_port = addr
-    colored_pseudo = colored(pseudo, color, attrs=['bold'])
+    id = hash(client_host + pseudo)
+    
+    colored_pseudo = ""
+    
+    if id not in CLIENTS.keys():
+        colors = ["red", "green", "yellow", "blue", "magenta", "cyan"]
         
-    print(f"Un nouvel utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom")
+        CLIENTS[id] = {}
+        CLIENTS[id]["r"] = reader
+        CLIENTS[id]["w"] = writer
+        CLIENTS[id]["addr"] = addr
+        CLIENTS[id]["pseudo"] = pseudo
+        CLIENTS[id]["color"] = choice(colors)
+        CLIENTS[id]["connected"] = True
         
-    for client in CLIENTS:
-        if client != addr:
-            CLIENTS[client]["w"].write(f"Annonce : {colored_pseudo} a rejoint la chatroom".encode())
-            await CLIENTS[client]["w"].drain()
-
+        colored_pseudo = colored(pseudo, CLIENTS[id]["color"], attrs=['bold'])
+            
+        print(f"Un nouvel utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom")
+            
+        for client_id in CLIENTS:
+            if client_id != id:
+                CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} a rejoint la chatroom".encode())
+                await CLIENTS[client_id]["w"].drain()
+    else:
+        # Met à jour le port du client s'il s'est déjà connecté une fois (ip est la même grâce au hash)
+        if CLIENTS[id]["addr"] != addr:
+            CLIENTS[id]["addr"] = addr
+        
+        CLIENTS[id]["connected"] = True
+        colored_pseudo = colored(pseudo, CLIENTS[id]["color"], attrs=['bold'])    
+        
+        writer.write(f"Welcome back {colored_pseudo} !")
+        await writer.drain()
+        
+        print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom")
+            
+        for client_id in CLIENTS:
+            if client_id != id:
+                CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} est de retour !".encode())
+                await CLIENTS[client_id]["w"].drain()
+        
     while True:
         data = await reader.read(1024)
         
         current_datetime = datetime.now()
         print(current_datetime)
         formatted_time = current_datetime.strftime('[%H:%M]')
-        
-        color = CLIENTS[addr]["color"]
 
         if data == b'':
-            CLIENTS.pop(addr)
-            for client in CLIENTS:
-                CLIENTS[client]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom".encode())
-                await CLIENTS[client]["w"].drain()
+            CLIENTS[id]["connected"] = False
+            for client_id in CLIENTS:
+                CLIENTS[client_id]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom".encode())
+                await CLIENTS[client_id]["w"].drain()
             continue
 
         message = data.decode()
         print(f"{formatted_time} Message reçu de {colored_pseudo} ({client_host}:{client_port}) : {message}")
         
-        # writer.write(f"Hello {client_host}:{client_port}".encode())
-        # await writer.drain()
-        
-        for client in CLIENTS:
-            if client != addr:
-                CLIENTS[client]["w"].write(f"{formatted_time} {colored_pseudo} a dit : {message}".encode())
-                await CLIENTS[client]["w"].drain()
+        for client_id in CLIENTS:
+            if client_id != addr:
+                CLIENTS[client_id]["w"].write(f"{formatted_time} {colored_pseudo} a dit : {message}".encode())
+                await CLIENTS[client_id]["w"].drain()
 
 
 async def main():
