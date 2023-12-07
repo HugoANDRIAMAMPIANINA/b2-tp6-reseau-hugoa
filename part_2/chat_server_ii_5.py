@@ -9,8 +9,8 @@ CLIENTS = {}
 
 
 async def handle_client_msg(reader, writer):
-    pseudo = await reader.read(1024).decode()[6:]
-    print(pseudo)
+    pseudo = await reader.read(1024)
+    print(pseudo.decode()[6:])
     
     addr = writer.get_extra_info('peername')
     if addr not in CLIENTS.keys():
