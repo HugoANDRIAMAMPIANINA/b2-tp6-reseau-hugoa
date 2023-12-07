@@ -1,6 +1,7 @@
 import asyncio
 from random import choice
 from termcolor import colored
+from datetime import datetime
 
 global HOST 
 HOST = "10.1.1.11"
@@ -38,24 +39,27 @@ async def handle_client_msg(reader, writer):
     while True:
         data = await reader.read(1024)
         
+        current_datetime = datetime.now()
+        formatted_time = current_datetime.strftime('[%H:%M]')
+        
         color = CLIENTS[addr]["color"]
 
         if data == b'':
             CLIENTS.pop(addr)
             for client in CLIENTS:
-                CLIENTS[client]["w"].write(f"Annonce : {colored_pseudo} a quitté la chatroom".encode())
+                CLIENTS[client]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom".encode())
                 await CLIENTS[client]["w"].drain()
             continue
 
         message = data.decode()
-        print(f"Message reçu de {colored_pseudo} ({client_host}:{client_port}) : {message}")
+        print(f"{formatted_time} Message reçu de {colored_pseudo} ({client_host}:{client_port}) : {message}")
         
         # writer.write(f"Hello {client_host}:{client_port}".encode())
         # await writer.drain()
         
         for client in CLIENTS:
             if client != addr:
-                CLIENTS[client]["w"].write(f"{colored_pseudo} a dit : {message}".encode())
+                CLIENTS[client]["w"].write(f"{formatted_time} {colored_pseudo} a dit : {message}".encode())
                 await CLIENTS[client]["w"].drain()
 
 

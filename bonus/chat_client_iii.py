@@ -1,6 +1,6 @@
 import asyncio
 from aioconsole import ainput
-from termcolor import colored
+# from termcolor import colored
 
 global HOST 
 HOST = "10.1.1.11"
@@ -9,7 +9,7 @@ PORT = 8888
 
 async def async_input(writer):
     while True:
-        user_message = await ainput("Entrez votre message : ")
+        user_message = await ainput("Entrez votre message :\n")
         if user_message == "":
             continue
         
