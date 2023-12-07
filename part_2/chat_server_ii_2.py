@@ -14,9 +14,9 @@ async def handle_client_msg(reader, writer):
             break
 
         message = data.decode()
-        print(f"{message!r} from client {addr!r}")
+        print(f"{message!r}")
 
-        writer.write(f"Hello {addr}".encode())
+        writer.write(f"Hello {addr[0]}:{addr[1]}".encode())
         await writer.drain()
 
 async def main():
