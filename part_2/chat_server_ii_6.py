@@ -41,8 +41,8 @@ async def handle_client_msg(reader, writer):
         message = data.decode()
         print(f"Message received from {client_host}:{client_port} : {message}")
         
-        writer.write(f"Hello {client_host}:{client_port}".encode())
-        await writer.drain()
+        # writer.write(f"Hello {client_host}:{client_port}".encode())
+        # await writer.drain()
         
         for client in CLIENTS:
             if client != addr:

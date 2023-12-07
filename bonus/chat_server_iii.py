@@ -25,8 +25,9 @@ async def handle_client_msg(reader, writer):
         CLIENTS[addr]["color"] = choice(colors)
         
     for client in CLIENTS:
+        color = CLIENTS[addr]["color"]
         if client != addr:
-            CLIENTS[client]["w"].write(f"Annonce : {pseudo} a rejoint la chatroom".encode())
+            CLIENTS[client]["w"].write(f"Annonce : {colored(pseudo, color)} a rejoint la chatroom".encode())
             await CLIENTS[client]["w"].drain()
 
     while True:
@@ -34,9 +35,9 @@ async def handle_client_msg(reader, writer):
         print(pseudo)
         
         client_host, client_port = addr
+        color = CLIENTS[addr]["color"]
 
         if data == b'':
-            color = CLIENTS[addr]["color"]
             CLIENTS.pop(addr)
             for client in CLIENTS:
                 CLIENTS[client]["w"].write(f"Annonce : {colored(pseudo, color)} a quitté la chatroom".encode())
@@ -44,14 +45,14 @@ async def handle_client_msg(reader, writer):
             continue
 
         message = data.decode()
-        print(f"Message received from {client_host}:{client_port} : {message}")
+        print(f"Message reçu de {colored(pseudo, color)} ({client_host}:{client_port}) : {message}")
         
-        writer.write(f"Hello {client_host}:{client_port}".encode())
-        await writer.drain()
+        # writer.write(f"Hello {client_host}:{client_port}".encode())
+        # await writer.drain()
         
         for client in CLIENTS:
             if client != addr:
-                CLIENTS[client]["w"].write(f"{pseudo} a dit : {message}".encode())
+                CLIENTS[client]["w"].write(f"{colored(pseudo, color)} a dit : {message}".encode())
                 await CLIENTS[client]["w"].drain()
 
 
