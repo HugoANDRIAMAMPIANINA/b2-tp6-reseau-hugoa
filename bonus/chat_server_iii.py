@@ -36,9 +36,10 @@ async def handle_client_msg(reader, writer):
         client_host, client_port = addr
 
         if data == b'':
+            color = CLIENTS[addr]["color"]
             CLIENTS.pop(addr)
             for client in CLIENTS:
-                CLIENTS[client]["w"].write(f"Annonce : {colored(pseudo, CLIENTS[addr]["color"])} a quitté la chatroom".encode())
+                CLIENTS[client]["w"].write(f"Annonce : {colored(pseudo, color)} a quitté la chatroom".encode())
                 await CLIENTS[client]["w"].drain()
             continue
 
