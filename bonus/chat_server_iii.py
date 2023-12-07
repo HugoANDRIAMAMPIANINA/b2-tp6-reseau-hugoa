@@ -25,6 +25,7 @@ async def handle_client_msg(reader, writer):
         CLIENTS[addr]["color"] = choice(colors)
         
     color = CLIENTS[addr]["color"]
+    client_host, client_port = addr
         
     print(f"Un nouvel utilisateur {colored(pseudo, color, attrs=['bold'])} ({client_host}:{client_port}) s'est connecté à la chatroom")
         
@@ -37,7 +38,6 @@ async def handle_client_msg(reader, writer):
         data = await reader.read(1024)
         print(pseudo)
         
-        client_host, client_port = addr
         color = CLIENTS[addr]["color"]
 
         if data == b'':
