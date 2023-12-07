@@ -32,8 +32,8 @@ async def handle_client_msg(reader, writer):
         
         for client in CLIENTS:
             if client != addr:
-                client["w"].write(f"{client[0]}:{client[1]} a dit : {message}")
-                await client["w"].drain()
+                CLIENTS[client]["w"].write(f"{client[0]}:{client[1]} a dit : {message}")
+                await CLIENTS[client]["w"].drain()
 
         
 
