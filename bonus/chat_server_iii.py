@@ -40,6 +40,7 @@ async def handle_client_msg(reader, writer):
         data = await reader.read(1024)
         
         current_datetime = datetime.now()
+        print(current_datetime)
         formatted_time = current_datetime.strftime('[%H:%M]')
         
         color = CLIENTS[addr]["color"]
