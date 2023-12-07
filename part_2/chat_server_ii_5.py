@@ -9,7 +9,7 @@ CLIENTS = {}
 
 
 async def handle_client_msg(reader, writer):
-    pseudo = reader.recv(1024).decode()[6:]
+    pseudo = reader.read(1024).decode()[6:]
     print(pseudo)
     
     addr = writer.get_extra_info('peername')
