@@ -10,7 +10,7 @@ async def async_input(writer):
     while True:
         user_message = await ainput()
         if user_message == "":
-            break
+            continue
         
         writer.write(user_message.encode())
         await writer.drain()
@@ -19,7 +19,7 @@ async def async_receive(reader):
     while True:
         server_response = await reader.read(1024)
         if server_response == b'':
-            break
+            continue
         
         print(f"{server_response.decode()}\n")
         
