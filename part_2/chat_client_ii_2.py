@@ -6,7 +6,7 @@ global PORT
 PORT = 8888
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((PORT, HOST))
+s.connect((HOST, PORT))
 
 greatings = "Hello"
 s.send(greatings.encode())
