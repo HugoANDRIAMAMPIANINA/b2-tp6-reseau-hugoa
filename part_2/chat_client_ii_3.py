@@ -9,8 +9,8 @@ PORT = 8888
 async def async_input(writer):
     while True:
         user_message = await ainput()
-        # if user_message == "":
-        #     continue
+        if user_message == "":
+            continue
         
         writer.write(user_message.encode())
         await writer.drain()
@@ -18,8 +18,8 @@ async def async_input(writer):
 async def async_receive(reader):
     while True:
         server_response = await reader.read(1024)
-        # if server_response == b'':
-        #     continue
+        if server_response == b'':
+            continue
         
         print(f"{server_response.decode()}\n")
         
@@ -28,7 +28,7 @@ async def main():
     
     tasks = [ async_input(writer), async_receive(reader) ]
     
-    asyncio.gather(*tasks)
+    await asyncio.gather(*tasks)
     
     
 if __name__ == "__main__":
