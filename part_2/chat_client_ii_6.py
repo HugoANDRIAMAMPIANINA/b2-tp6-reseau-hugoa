@@ -19,8 +19,8 @@ async def async_receive(reader):
     while True:
         server_response = await reader.read(1024)
         if server_response == b'':
-            print("Le serveur s'est déconnecté. Aurevoir")
-            exit(0)
+            raise Exception("Le serveur s'est déconnecté. Aurevoir")
+            # exit(0)
         
         print(f"{server_response.decode()}\n")
     
