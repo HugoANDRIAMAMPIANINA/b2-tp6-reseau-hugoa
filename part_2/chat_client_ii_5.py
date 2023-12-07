@@ -30,7 +30,6 @@ async def main():
     reader, writer = await asyncio.open_connection(host=HOST, port=PORT)
     
     writer.write(f"Hello|{pseudo}".encode())
-    writer.drain()
     
     tasks = [ async_input(writer), async_receive(reader) ]
     
