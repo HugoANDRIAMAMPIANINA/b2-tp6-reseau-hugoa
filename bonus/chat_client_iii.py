@@ -9,7 +9,7 @@ PORT = 8888
 
 async def async_input(writer):
     while True:
-        user_message = await ainput()
+        user_message = await ainput("Entrez votre message : ")
         if user_message == "":
             continue
         
@@ -24,7 +24,7 @@ async def async_receive(reader):
             raise Exception("Le serveur s'est déconnecté. Aurevoir")
         
         message = server_response.decode()
-        print(f"{message}\n")
+        print(f"{message}")
     
         
 async def main():
