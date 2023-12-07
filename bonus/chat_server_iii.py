@@ -39,7 +39,7 @@ async def handle_client_msg(reader, writer):
         print(f"Un nouvel utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom")
             
         for client_id in CLIENTS:
-            if client_id != id:
+            if client_id != id and CLIENTS[client_id]["connected"]:
                 CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} a rejoint la chatroom".encode())
                 await CLIENTS[client_id]["w"].drain()
     else:
@@ -56,7 +56,7 @@ async def handle_client_msg(reader, writer):
         print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom")
             
         for client_id in CLIENTS:
-            if client_id != id:
+            if client_id != id and CLIENTS[client_id]["connected"]:
                 CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} est de retour !".encode())
                 await CLIENTS[client_id]["w"].drain()
         
@@ -64,21 +64,24 @@ async def handle_client_msg(reader, writer):
         data = await reader.read(1024)
         
         current_datetime = datetime.now()
-        print(current_datetime)
         formatted_time = current_datetime.strftime('[%H:%M]')
 
         if data == b'':
             CLIENTS[id]["connected"] = False
             for client_id in CLIENTS:
-                CLIENTS[client_id]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom".encode())
-                await CLIENTS[client_id]["w"].drain()
-            continue
+                if CLIENTS[client_id]["connected"]:
+                    CLIENTS[client_id]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom".encode())
+                    await CLIENTS[client_id]["w"].drain()
+            writer.close()
+            await writer.wait_closed()
+            reader.close()
+            await reader.wait_closed()
 
         message = data.decode()
         print(f"{formatted_time} Message reçu de {colored_pseudo} ({client_host}:{client_port}) : {message}")
         
         for client_id in CLIENTS:
-            if client_id != id:
+            if client_id != id and CLIENTS[client_id]["connected"]:
                 CLIENTS[client_id]["w"].write(f"{formatted_time} {colored_pseudo} a dit : {message}".encode())
                 await CLIENTS[client_id]["w"].drain()
 
