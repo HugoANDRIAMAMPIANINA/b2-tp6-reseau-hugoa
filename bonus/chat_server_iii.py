@@ -76,7 +76,7 @@ async def handle_client_msg(reader, writer):
                     await CLIENTS[client_id]["w"].drain()
             writer.close()
             await writer.wait_closed()
-            continue
+            break
 
         message = data.decode()
         print(f"{formatted_time} Message reçu de {colored_pseudo} ({client_host}:{client_port}) : {message}")
