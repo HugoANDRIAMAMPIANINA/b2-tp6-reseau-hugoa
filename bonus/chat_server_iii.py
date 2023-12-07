@@ -47,6 +47,8 @@ async def handle_client_msg(reader, writer):
         if CLIENTS[id]["addr"] != addr:
             CLIENTS[id]["addr"] = addr
         
+        CLIENTS[id]["w"] = writer
+        CLIENTS[id]["r"] = reader
         CLIENTS[id]["connected"] = True
         colored_pseudo = colored(pseudo, CLIENTS[id]["color"], attrs=['bold'])    
         
@@ -74,8 +76,6 @@ async def handle_client_msg(reader, writer):
                     await CLIENTS[client_id]["w"].drain()
             writer.close()
             await writer.wait_closed()
-            reader.close()
-            await reader.wait_closed()
 
         message = data.decode()
         print(f"{formatted_time} Message reçu de {colored_pseudo} ({client_host}:{client_port}) : {message}")
