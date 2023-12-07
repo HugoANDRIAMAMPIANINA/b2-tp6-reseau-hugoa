@@ -9,8 +9,10 @@ CLIENTS = {}
 
 
 async def handle_client_msg(reader, writer):
-    pseudo = await reader.read(1024)
-    print(pseudo.decode()[6:])
+    data = await reader.read(1024)
+    pseudo = ""
+    if data[:4] == "Hello":
+        pseudo = pseudo.decode()[6:]
     
     addr = writer.get_extra_info('peername')
     if addr not in CLIENTS.keys():
@@ -18,6 +20,11 @@ async def handle_client_msg(reader, writer):
         CLIENTS[addr]["r"] = reader
         CLIENTS[addr]["w"] = writer
         CLIENTS[addr]["pseudo"] = pseudo
+        
+    for client in CLIENTS:
+        if client != addr:
+            CLIENTS[client]["w"].write(f"Annonce : {pseudo} a rejoint la chatroom".encode())
+            await CLIENTS[client]["w"].drain()
 
     while True:
         data = await reader.read(1024)
@@ -35,7 +42,7 @@ async def handle_client_msg(reader, writer):
         
         for client in CLIENTS:
             if client != addr:
-                CLIENTS[client]["w"].write(f"{client_host}:{client_port} a dit : {message}".encode())
+                CLIENTS[client]["w"].write(f"{pseudo} a dit : {message}".encode())
                 await CLIENTS[client]["w"].drain()
 
         
