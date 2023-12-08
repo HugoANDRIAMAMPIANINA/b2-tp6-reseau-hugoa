@@ -61,8 +61,8 @@ async def main():
             print("Veuillez entrer un chiffre entre 1 et 9\n")
     
     reader, writer = await asyncio.open_connection(host, port)
-    
-    writer.write(f"Hello|{room_number}|{pseudo}".encode())
+    encoded_message = encode_message(f"Hello|{room_number}|{pseudo}")
+    writer.write(encoded_message)
     
     tasks = [ async_input(writer), async_receive(reader) ]
     
