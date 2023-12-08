@@ -15,7 +15,7 @@ async def async_input(writer: asyncio.StreamWriter):
         print(f"Vous avez dit : {user_message}")
         
         encoded_message = encode_message(user_message)
-        write_message(writer, encoded_message)
+        await write_message(writer, encoded_message)
         
 async def async_receive(reader: asyncio.StreamReader):
     while True:
