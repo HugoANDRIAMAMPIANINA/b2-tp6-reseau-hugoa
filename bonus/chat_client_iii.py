@@ -1,6 +1,8 @@
 import asyncio
 from aioconsole import ainput
-# from termcolor import colored
+from os.path import isfile, exists
+from json import load
+from argparse import ArgumentParser
 
 global HOST 
 HOST = "10.1.1.11"
@@ -28,6 +30,19 @@ async def async_receive(reader):
     
         
 async def main():
+    parser = ArgumentParser()
+    parser.add_argument("-p", "--port", action="store")
+    parser.add_argument("-a", "--address", action="store")
+    
+    args = parser.parse_args()
+    
+    host, port = args.address, args.port
+    
+    if (host is None) and (port is None) and exists("config.json") and isfile("config.json"):
+        with open('config.json', 'r') as openfile:
+            json_object = load(openfile)
+        host, port = json_object["host"], json_object["port"]
+    
     pseudo = input("Entrez votre pseudo : ")
     
     reader, writer = await asyncio.open_connection(host=HOST, port=PORT)

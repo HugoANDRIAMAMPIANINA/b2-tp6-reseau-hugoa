@@ -2,11 +2,11 @@ import asyncio
 from random import choice
 from termcolor import colored
 from datetime import datetime
+from os.path import isfile, exists
+from json import load
+from argparse import ArgumentParser
 
-global HOST 
-HOST = "10.1.1.11"
-global PORT
-PORT = 8888
+
 global CLIENTS
 CLIENTS = {}
 
@@ -89,7 +89,20 @@ async def handle_client_msg(reader, writer):
 
 
 async def main():
-    server = await asyncio.start_server(handle_client_msg, HOST, PORT)
+    parser = ArgumentParser()
+    parser.add_argument("-p", "--port", action="store")
+    parser.add_argument("-a", "--address", action="store")
+    
+    args = parser.parse_args()
+    
+    host, port = args.address, args.port
+    
+    if (host is None) and (port is None) and exists("config.json") and isfile("config.json"):
+        with open('config.json', 'r') as openfile:
+            json_object = load(openfile)
+        host, port = json_object["host"], json_object["port"]
+    
+    server = await asyncio.start_server(handle_client_msg, host, port)
 
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
     print(f'Serving on {addrs}')
