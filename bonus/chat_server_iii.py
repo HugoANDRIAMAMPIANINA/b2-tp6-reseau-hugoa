@@ -13,8 +13,10 @@ CLIENTS = {}
 async def handle_client_msg(reader, writer):
     data = await reader.read(1024)
     pseudo = ""
+    room_number = 0
     if data.decode()[:5] == "Hello":
-        pseudo = data.decode()[6:]
+        room_number = int(data.decode()[6])
+        pseudo = data.decode()[8:]
     
     addr = writer.get_extra_info('peername')
     
@@ -33,20 +35,22 @@ async def handle_client_msg(reader, writer):
         CLIENTS[id]["pseudo"] = pseudo
         CLIENTS[id]["color"] = choice(colors)
         CLIENTS[id]["connected"] = True
+        CLIENTS[id]["room"] = room_number
         
         colored_pseudo = colored(pseudo, CLIENTS[id]["color"], attrs=['bold'])
             
-        print(f"Un nouvel utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom")
+        print(f"Un nouvel utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom {room_number}")
             
         for client_id in CLIENTS:
-            if client_id != id and CLIENTS[client_id]["connected"]:
-                CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} a rejoint la chatroom".encode())
+            if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[id]["room"] == room_number:
+                CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} a rejoint la chatroom {room_number}".encode())
                 await CLIENTS[client_id]["w"].drain()
     else:
         # Met à jour le port du client s'il s'est déjà connecté une fois (ip est la même grâce au hash)
         if CLIENTS[id]["addr"] != addr:
             CLIENTS[id]["addr"] = addr
         
+        CLIENTS[id]["room"] = room_number
         CLIENTS[id]["w"] = writer
         CLIENTS[id]["r"] = reader
         CLIENTS[id]["connected"] = True
@@ -55,10 +59,10 @@ async def handle_client_msg(reader, writer):
         writer.write(f"Welcome back {colored_pseudo} !".encode())
         await writer.drain()
         
-        print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom")
+        print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom {room_number}")
             
         for client_id in CLIENTS:
-            if client_id != id and CLIENTS[client_id]["connected"]:
+            if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[id]["room"] == room_number:
                 CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} est de retour !".encode())
                 await CLIENTS[client_id]["w"].drain()
         
@@ -67,23 +71,22 @@ async def handle_client_msg(reader, writer):
         
         current_datetime = datetime.now()
         formatted_time = current_datetime.strftime('[%H:%M]')
-        print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est déconnecté de la chatroom")
         if data == b'':
             CLIENTS[id]["connected"] = False
-            
+            print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est déconnecté de la chatroom numéro {room_number}")
             for client_id in CLIENTS:
-                if CLIENTS[client_id]["connected"]:
-                    CLIENTS[client_id]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom".encode())
+                if CLIENTS[client_id]["connected"] and CLIENTS[id]["room"] == room_number:
+                    CLIENTS[client_id]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom {room_number}".encode())
                     await CLIENTS[client_id]["w"].drain()
             writer.close()
             await writer.wait_closed()
             break
 
         message = data.decode()
-        print(f"{formatted_time} Message reçu de {colored_pseudo} ({client_host}:{client_port}) : {message}")
+        print(f"{formatted_time} Chatroom {room_number} Message reçu de {colored_pseudo} ({client_host}:{client_port})  : {message}")
         
         for client_id in CLIENTS:
-            if client_id != id and CLIENTS[client_id]["connected"]:
+            if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[id]["room"] == room_number:
                 CLIENTS[client_id]["w"].write(f"{formatted_time} {colored_pseudo} a dit : {message}".encode())
                 await CLIENTS[client_id]["w"].drain()
 

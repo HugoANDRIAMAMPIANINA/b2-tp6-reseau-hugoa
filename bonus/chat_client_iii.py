@@ -4,10 +4,6 @@ from os.path import isfile, exists
 from json import load
 from argparse import ArgumentParser
 
-global HOST 
-HOST = "10.1.1.11"
-global PORT
-PORT = 8888
 
 async def async_input(writer):
     while True:
@@ -45,9 +41,16 @@ async def main():
     
     pseudo = input("Entrez votre pseudo : ")
     
-    reader, writer = await asyncio.open_connection(host=HOST, port=PORT)
+    room_number = 0
+    while room_number < 1 or room_number > 9:
+        try:
+            room_number = int(input("Choisissez une room à laquelle vous connecter (chiffre de 1 à 9) : "))
+        except:
+            print("Veuillez entrer un chiffre entre 1 et 9\n")
     
-    writer.write(f"Hello|{pseudo}".encode())
+    reader, writer = await asyncio.open_connection(host, port)
+    
+    writer.write(f"Hello|{room_number}|{pseudo}".encode())
     
     tasks = [ async_input(writer), async_receive(reader) ]
     
