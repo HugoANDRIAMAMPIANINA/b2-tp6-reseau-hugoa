@@ -12,17 +12,8 @@ global CLIENTS
 CLIENTS = {}
 
 async def handle_client_msg(reader, writer):
-    # header = await reader.read(1)
-    # next_bytes_to_read = int.from_bytes(header, byteorder='big')
-    # print(f"{next_bytes_to_read}")
-    # if next_bytes_to_read == 1:
-    #     next_bytes_to_read = 2
-    # message_len = await reader.read(next_bytes_to_read)
-    # message_len = int.from_bytes(message_len, byteorder='big')
-    # print(message_len)
     header = await read_header(reader)
     data = await read_message(reader, header)
-    print(data.decode())
     
     pseudo = ""
     room_number = 0
@@ -70,7 +61,7 @@ async def handle_client_msg(reader, writer):
         
         colored_pseudo = colored(pseudo, CLIENTS[id]["color"], attrs=['bold'])    
         
-        encoded_message = encoded_message(f"Welcome back {colored_pseudo} !")
+        encoded_message = encode_message(f"Welcome back {colored_pseudo} !")
         writer.write(encoded_message)
         await writer.drain()
         
@@ -106,7 +97,7 @@ async def handle_client_msg(reader, writer):
         
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
-                encoded_message = encoded_message(f"{formatted_time} {colored_pseudo} a dit : {message}")
+                encoded_message = encode_message(f"{formatted_time} {colored_pseudo} a dit : {message}")
                 CLIENTS[client_id]["w"].write(encoded_message)
                 await CLIENTS[client_id]["w"].drain()
 
