@@ -14,12 +14,15 @@ CLIENTS = {}
 async def handle_client_msg(reader, writer):
     header = await reader.read(1)
     next_bytes_to_read = int.from_bytes(header, byteorder='big')
+    print(next_bytes_to_read)
     if next_bytes_to_read == 1:
         next_bytes_to_read = 2
     message_len = await reader.read(next_bytes_to_read)
     message_len = int.from_bytes(message_len, byteorder='big')
+    print(message_len)
     
     data = await reader.read(message_len)
+    print(data.decode())
     
     pseudo = ""
     room_number = 0
