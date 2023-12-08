@@ -1,7 +1,7 @@
 from math import ceil
 import asyncio
 
-def encode_message(message:str) -> bytes:
+def encode_message(message: bytes) -> bytes:
     message_len = len(message)
     message_len_bit_length = message_len.bit_length()
     message_len_byte_length = 2 if ceil(message_len_bit_length/8.0) < 3 else ceil(message_len_bit_length/8.0)
@@ -12,14 +12,15 @@ def encode_message(message:str) -> bytes:
     
     return sequence
 
-def write_message(writer) -> None:
-    pass
+async def write_message(writer: asyncio.StreamWriter, message: bytes) -> None:
+    writer.write(message)
+    await writer.drain()
 
-async def read_header(reader) -> bytes:
+async def read_header(reader: asyncio.StreamReader) -> bytes:
     header = await reader.read(1)
     return header
 
-async def read_message(reader, header) -> bytes:
+async def read_message(reader: asyncio.StreamReader, header) -> bytes:
     next_bytes_to_read = int.from_bytes(header, byteorder='big')
     if next_bytes_to_read == 1:
         next_bytes_to_read = 2

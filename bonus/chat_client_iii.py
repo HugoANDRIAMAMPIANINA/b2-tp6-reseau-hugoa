@@ -3,10 +3,10 @@ from aioconsole import ainput
 from os.path import isfile, exists
 from json import load
 from argparse import ArgumentParser
-from encoding import encode_message, read_header, read_message
+from encoding import encode_message, read_header, read_message, write_message
 
 
-async def async_input(writer):
+async def async_input(writer: asyncio.StreamWriter):
     while True:
         user_message = await ainput("")
         if user_message == "":
@@ -15,10 +15,9 @@ async def async_input(writer):
         print(f"Vous avez dit : {user_message}")
         
         encoded_message = encode_message(user_message)
-        writer.write(encoded_message)
-        await writer.drain()
+        write_message(writer, encoded_message)
         
-async def async_receive(reader):
+async def async_receive(reader: asyncio.StreamReader):
     while True:
         header = await read_header(reader)
         
