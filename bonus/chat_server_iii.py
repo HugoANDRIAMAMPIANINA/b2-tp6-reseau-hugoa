@@ -5,13 +5,20 @@ from datetime import datetime
 from os.path import isfile, exists
 from json import load
 from argparse import ArgumentParser
+from encoding import encode_message
 
 
 global CLIENTS
 CLIENTS = {}
 
 async def handle_client_msg(reader, writer):
-    data = await reader.read(1024)
+    header = await reader.read(1)
+    next_bytes_to_read = int.from_bytes(header, byteorder='big')
+    message_len = await reader.read(next_bytes_to_read)
+    message_len = int.from_bytes(message_len, byteorder='big')
+    
+    data = await reader.read(message_len)
+    
     pseudo = ""
     room_number = 0
     if data.decode()[:5] == "Hello":
@@ -43,7 +50,8 @@ async def handle_client_msg(reader, writer):
             
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
-                CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} a rejoint la chatroom {room_number}".encode())
+                encoded_message = encode_message(f"Annonce : {colored_pseudo} a rejoint la chatroom {room_number}")
+                CLIENTS[client_id]["w"].write(encoded_message)
                 await CLIENTS[client_id]["w"].drain()
     else:
         # Met à jour le port du client s'il s'est déjà connecté une fois (ip est la même grâce au hash)
@@ -54,40 +62,53 @@ async def handle_client_msg(reader, writer):
         CLIENTS[id]["w"] = writer
         CLIENTS[id]["r"] = reader
         CLIENTS[id]["connected"] = True
+        
         colored_pseudo = colored(pseudo, CLIENTS[id]["color"], attrs=['bold'])    
         
-        writer.write(f"Welcome back {colored_pseudo} !".encode())
+        encoded_message = encoded_message(f"Welcome back {colored_pseudo} !")
+        writer.write(encoded_message)
         await writer.drain()
         
         print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom {room_number}")
             
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
-                CLIENTS[client_id]["w"].write(f"Annonce : {colored_pseudo} est de retour !".encode())
+                encoded_message = encode_message(f"Annonce : {colored_pseudo} est de retour !")
+                CLIENTS[client_id]["w"].write(encoded_message)
                 await CLIENTS[client_id]["w"].drain()
         
     while True:
-        data = await reader.read(1024)
+        header = await reader.read(1)
         
         current_datetime = datetime.now()
         formatted_time = current_datetime.strftime('[%H:%M]')
-        if data == b'':
+        if header == b'':
             CLIENTS[id]["connected"] = False
             print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est déconnecté de la chatroom numéro {room_number}")
             for client_id in CLIENTS:
                 if CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
-                    CLIENTS[client_id]["w"].write(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom {room_number}".encode())
+                    encoded_message = encode_message(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom {room_number}")
+                    CLIENTS[client_id]["w"].write(encoded_message)
                     await CLIENTS[client_id]["w"].drain()
             writer.close()
             await writer.wait_closed()
             break
+        
+        next_bytes_to_read = int.from_bytes(header, byteorder='big')
+        message_len = await reader.read(next_bytes_to_read)
+        message_len = int.from_bytes(message_len, byteorder='big')
+        
+        data = await reader.read(message_len)
+        
+        
 
         message = data.decode()
         print(f"{formatted_time} Chatroom {room_number} Message reçu de {colored_pseudo} ({client_host}:{client_port})  : {message}")
         
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
-                CLIENTS[client_id]["w"].write(f"{formatted_time} {colored_pseudo} a dit : {message}".encode())
+                encoded_message = encoded_message(f"{formatted_time} {colored_pseudo} a dit : {message}")
+                CLIENTS[client_id]["w"].write(encoded_message)
                 await CLIENTS[client_id]["w"].drain()
 
 
