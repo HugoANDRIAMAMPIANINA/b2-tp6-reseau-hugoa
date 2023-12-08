@@ -14,7 +14,7 @@ CLIENTS = {}
 async def handle_client_msg(reader, writer):
     header = await reader.read(1)
     next_bytes_to_read = int.from_bytes(header, byteorder='big')
-    print(next_bytes_to_read)
+    print(f"{next_bytes_to_read}\n")
     if next_bytes_to_read == 1:
         next_bytes_to_read = 2
     message_len = await reader.read(next_bytes_to_read)
