@@ -7,7 +7,7 @@ def encode_message(message:str) -> bytes:
     message_len_length = 1 if message_len_byte_length < 3 else 2
     
     header = message_len_length.to_bytes(1, byteorder='big')
-    sequence = header + message_len.from_bytes(message_len_byte_length) + message.encode()
+    sequence = header + message_len.to_bytes(message_len_byte_length, byteorder='big') + message.encode()
     
     return sequence
 
