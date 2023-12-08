@@ -73,7 +73,6 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
         
     while True:
         header = await read_header(reader)
-        print(room_number)
         current_datetime = datetime.now()
         formatted_time = current_datetime.strftime('[%H:%M]')
         if header == b'':
@@ -81,11 +80,10 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
             print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est déconnecté de la chatroom {room_number}")
             for client_id in CLIENTS:
                 if CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
+                    print("nb room : ",room_number)
                     encoded_message = encode_message(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom {room_number}")
                     client_writer = CLIENTS[client_id]["w"]
-                    print("par là")
                     await write_message(client_writer, encoded_message)
-                    print("par là aussi")
             writer.close()
             await writer.wait_closed()
             break
