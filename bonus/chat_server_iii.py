@@ -14,6 +14,8 @@ CLIENTS = {}
 async def handle_client_msg(reader, writer):
     header = await reader.read(1)
     next_bytes_to_read = int.from_bytes(header, byteorder='big')
+    if next_bytes_to_read == 1:
+        next_bytes_to_read = 2
     message_len = await reader.read(next_bytes_to_read)
     message_len = int.from_bytes(message_len, byteorder='big')
     
@@ -95,6 +97,8 @@ async def handle_client_msg(reader, writer):
             break
         
         next_bytes_to_read = int.from_bytes(header, byteorder='big')
+        if next_bytes_to_read == 1:
+            next_bytes_to_read = 2
         message_len = await reader.read(next_bytes_to_read)
         message_len = int.from_bytes(message_len, byteorder='big')
         
