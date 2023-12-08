@@ -26,6 +26,8 @@ async def async_receive(reader):
             raise Exception("Le serveur s'est déconnecté. Aurevoir")
         
         next_bytes_to_read = int.from_bytes(header, byteorder='big')
+        if next_bytes_to_read == 1:
+            next_bytes_to_read = 2
         message_len = await reader.read(next_bytes_to_read)
         message_len = int.from_bytes(message_len, byteorder='big')
         
