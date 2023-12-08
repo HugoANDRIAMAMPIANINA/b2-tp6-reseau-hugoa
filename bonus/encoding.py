@@ -1,4 +1,5 @@
 from math import ceil
+import asyncio
 
 def encode_message(message:str) -> bytes:
     message_len = len(message)
@@ -11,6 +12,22 @@ def encode_message(message:str) -> bytes:
     sequence = header + message_len.to_bytes(message_len_byte_length, byteorder='big') + message.encode()
     
     return sequence
+
+def write_message(writer) -> None:
+    pass
+
+async def read_header(reader) -> bytes:
+    header = await reader.read(1)
+    return header
+
+async def read_message(reader, header) -> bytes:
+    next_bytes_to_read = int.from_bytes(header, byteorder='big')
+    if next_bytes_to_read == 1:
+        next_bytes_to_read = 2
+    message_len = await reader.read(next_bytes_to_read)
+    message_len = int.from_bytes(message_len, byteorder='big')
+    data = await reader.read(message_len)
+    return data
 
 def decode_message(message:bytes) -> str:
     pass

@@ -5,23 +5,23 @@ from datetime import datetime
 from os.path import isfile, exists
 from json import load
 from argparse import ArgumentParser
-from encoding import encode_message
+from encoding import encode_message, read_header, read_message, write_message
 
 
 global CLIENTS
 CLIENTS = {}
 
 async def handle_client_msg(reader, writer):
-    header = await reader.read(1)
-    next_bytes_to_read = int.from_bytes(header, byteorder='big')
-    print(f"{next_bytes_to_read}")
-    if next_bytes_to_read == 1:
-        next_bytes_to_read = 2
-    message_len = await reader.read(next_bytes_to_read)
-    message_len = int.from_bytes(message_len, byteorder='big')
-    print(message_len)
-    
-    data = await reader.read(message_len)
+    # header = await reader.read(1)
+    # next_bytes_to_read = int.from_bytes(header, byteorder='big')
+    # print(f"{next_bytes_to_read}")
+    # if next_bytes_to_read == 1:
+    #     next_bytes_to_read = 2
+    # message_len = await reader.read(next_bytes_to_read)
+    # message_len = int.from_bytes(message_len, byteorder='big')
+    # print(message_len)
+    header = await read_header(reader)
+    data = await read_message(reader, header)
     print(data.decode())
     
     pseudo = ""
@@ -83,13 +83,13 @@ async def handle_client_msg(reader, writer):
                 await CLIENTS[client_id]["w"].drain()
         
     while True:
-        header = await reader.read(1)
+        header = await read_header(reader)
         
         current_datetime = datetime.now()
         formatted_time = current_datetime.strftime('[%H:%M]')
         if header == b'':
             CLIENTS[id]["connected"] = False
-            print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est déconnecté de la chatroom numéro {room_number}")
+            print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est déconnecté de la chatroom {room_number}")
             for client_id in CLIENTS:
                 if CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
                     encoded_message = encode_message(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom {room_number}")
@@ -99,15 +99,7 @@ async def handle_client_msg(reader, writer):
             await writer.wait_closed()
             break
         
-        next_bytes_to_read = int.from_bytes(header, byteorder='big')
-        if next_bytes_to_read == 1:
-            next_bytes_to_read = 2
-        message_len = await reader.read(next_bytes_to_read)
-        message_len = int.from_bytes(message_len, byteorder='big')
-        
-        data = await reader.read(message_len)
-        
-        
+        data = await read_message(reader, header)
 
         message = data.decode()
         print(f"{formatted_time} Chatroom {room_number} Message reçu de {colored_pseudo} ({client_host}:{client_port})  : {message}")

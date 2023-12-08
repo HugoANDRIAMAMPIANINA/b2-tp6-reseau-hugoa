@@ -3,7 +3,7 @@ from aioconsole import ainput
 from os.path import isfile, exists
 from json import load
 from argparse import ArgumentParser
-from encoding import encode_message
+from encoding import encode_message, read_header, read_message
 
 
 async def async_input(writer):
@@ -20,18 +20,12 @@ async def async_input(writer):
         
 async def async_receive(reader):
     while True:
-        header = await reader.read(1)
+        header = await read_header(reader)
         
         if header == b'':
             raise Exception("Le serveur s'est déconnecté. Aurevoir")
         
-        next_bytes_to_read = int.from_bytes(header, byteorder='big')
-        if next_bytes_to_read == 1:
-            next_bytes_to_read = 2
-        message_len = await reader.read(next_bytes_to_read)
-        message_len = int.from_bytes(message_len, byteorder='big')
-        
-        data = await reader.read(message_len)
+        data = await read_message(reader, header)
         
         message = data.decode()
         print(f"{message}")
