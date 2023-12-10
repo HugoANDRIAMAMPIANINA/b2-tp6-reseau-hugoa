@@ -12,41 +12,6 @@ global CLIENTS
 CLIENTS = {}
 
 
-import json
-
-def store_message(message, number):
-    room = str(number)
-    history = []
-    try:
-        with open('history.json', 'r') as file:
-            history = json.load(file)
-    except FileNotFoundError:
-        pass
-    exists = False
-    for item in history:
-        if item['key'] == room:
-            item['value'].append(message)
-            exists = True
-            break
-    if not exists:
-        history.append({'key': room, 'value': [message]})
-    with open('history.json', 'w') as file:
-        json.dump(history, file)
-
-def get_history(number):
-    room = str(number)
-    try:
-        with open('history.json', 'r') as file:
-            history = json.load(file)
-            for item in history:
-                if item['key'] == room:
-                    return item['value']
-            print('room not found.')
-            return None
-    except FileNotFoundError:
-        print('File not found.')
-        return None
-
 async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     header = await read_header(reader)
     data = await read_message(reader, header)
@@ -108,11 +73,6 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
                 encoded_message = encode_message(f"Annonce : {colored_pseudo} est de retour !")
                 client_writer = CLIENTS[client_id]["w"]
                 await write_message(client_writer, encoded_message)
-                
-    room_history = get_history(room_number)
-    if room_history is not None:
-        encoded_history = encode_message(room_history)
-        await write_message(writer, encoded_history)
         
     while True:
         header = await read_header(reader)
@@ -136,8 +96,6 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
 
         message = data.decode()
         print(f"{formatted_time} Chatroom {room_number} Message reçu de {colored_pseudo} ({client_host}:{client_port})  : {message}")
-        
-        store_message(f"{formatted_time} {colored_pseudo} a dit : {message}", room_number)
         
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
