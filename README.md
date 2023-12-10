@@ -15,3 +15,11 @@ Temps d'execution du script en secondes : 5.717263324999294
 [hugoa@server part_1]$ python web_async_multiple.py urls.txt
 Temps d'execution du script en secondes : 3.8225426230001176
 ```
+
+# III - Bonus
+
+- Basic Cosmetic
+- Gestion d'ID
+- Config et argument
+- Plusieurs Rooms
+- Encodage Maison
