@@ -13,6 +13,8 @@ CLIENTS = {}
 
 async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     header = await read_header(reader)
+    print(header)
+    print(int.from_bytes(header, byteorder='big'))
     data = await read_message(reader, header)
     
     pseudo = ""
