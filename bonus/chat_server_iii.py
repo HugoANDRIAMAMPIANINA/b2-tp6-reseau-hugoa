@@ -72,7 +72,9 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
         print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom {room_number}")
             
         for client_id in CLIENTS:
+            print("entering loop")
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
+                print("condition okay")
                 encoded_message = encode_message(f"Annonce : {colored_pseudo} est de retour !")
                 CLIENTS[client_id]["w"].write(encoded_message)
                 await CLIENTS[client_id]["w"].drain()
