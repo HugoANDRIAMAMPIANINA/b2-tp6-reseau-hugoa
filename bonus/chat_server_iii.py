@@ -33,7 +33,7 @@ def store_message(message, number):
     with open('history.json', 'w') as file:
         json.dump(history, file)
 
-def get_message(number):
+def get_history(number):
     room = str(number)
     try:
         with open('history.json', 'r') as file:
