@@ -106,8 +106,8 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
                 encoded_message = encode_message(f"{formatted_time} {colored_pseudo} a dit : {message}")
-                writer.write(encoded_message)
-                await writer.drain()
+                CLIENTS[client_id]["w"].write(encoded_message)
+                await CLIENTS[client_id]["w"].drain()
                 # client_writer = CLIENTS[client_id]["w"]
                 # await write_message(client_writer, encoded_message)
 
