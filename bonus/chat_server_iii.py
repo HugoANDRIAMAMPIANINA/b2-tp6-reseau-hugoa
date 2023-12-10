@@ -12,30 +12,39 @@ global CLIENTS
 CLIENTS = {}
 
 
+import json
+
 def store_message(message, number):
     room = str(number)
-    history = {}
+    history = []
     try:
         with open('history.json', 'r') as file:
-            history = load(file)
+            history = json.load(file)
     except FileNotFoundError:
-        print("pas pu sauvegarder")
         pass
-    history[room] += f"{message}\n"
+    exists = False
+    for item in history:
+        if item['key'] == room:
+            item['value'].append(message)
+            exists = True
+            break
+    if not exists:
+        history.append({'key': room, 'value': [message]})
     with open('history.json', 'w') as file:
-        dump(history, file)
+        json.dump(history, file)
 
-def get_history(number):
+def get_message(number):
     room = str(number)
     try:
         with open('history.json', 'r') as file:
-            history = load(file)
-            return history[room]
+            history = json.load(file)
+            for item in history:
+                if item['key'] == room:
+                    return item['value']
+            print('room not found.')
+            return None
     except FileNotFoundError:
-        print('File not found')
-        return None
-    except KeyError:
-        print('Room not found')
+        print('File not found.')
         return None
 
 async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
