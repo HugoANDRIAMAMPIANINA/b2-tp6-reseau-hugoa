@@ -13,8 +13,6 @@ CLIENTS = {}
 
 async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     header = await read_header(reader)
-    print(header)
-    print(int.from_bytes(header, byteorder='big'))
     data = await read_message(reader, header)
     
     pseudo = ""
@@ -31,6 +29,7 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
     colored_pseudo = ""
     
     if id not in CLIENTS.keys():
+        print("nouveau")
         colors = ["red", "green", "yellow", "blue", "magenta", "cyan"]
         
         CLIENTS[id] = {}
@@ -49,8 +48,11 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
                 encoded_message = encode_message(f"Annonce : {colored_pseudo} a rejoint la chatroom {room_number}")
-                await write_message(CLIENTS[client_id]["w"], encoded_message)
+                CLIENTS[client_id]["w"].write(encoded_message)
+                await CLIENTS[client_id]["w"].drain()
+                # await write_message(CLIENTS[client_id]["w"], encoded_message)
     else:
+        print("deja client")
         # Met à jour le port du client s'il s'est déjà connecté une fois (ip est la même grâce au hash)
         if CLIENTS[id]["addr"] != addr:
             CLIENTS[id]["addr"] = addr
@@ -63,18 +65,22 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
         colored_pseudo = colored(pseudo, CLIENTS[id]["color"], attrs=['bold'])    
         
         encoded_message = encode_message(f"Welcome back {colored_pseudo} !")
-        await write_message(writer, encoded_message)
+        writer.write(encoded_message)
+        await writer.drain()
+        # await write_message(writer, encoded_message)
         
         print(f"L'utilisateur {colored_pseudo} ({client_host}:{client_port}) s'est connecté à la chatroom {room_number}")
             
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
                 encoded_message = encode_message(f"Annonce : {colored_pseudo} est de retour !")
-                client_writer = CLIENTS[client_id]["w"]
-                await write_message(client_writer, encoded_message)
+                CLIENTS[client_id]["w"].write(encoded_message)
+                await CLIENTS[client_id]["w"].drain()
+                # await write_message(client_writer, encoded_message)
         
     while True:
         header = await read_header(reader)
+        
         current_datetime = datetime.now()
         formatted_time = current_datetime.strftime('[%H:%M]')
         if header == b'':
@@ -84,8 +90,10 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
                 if CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
                     print("nb room : ",room_number)
                     encoded_message = encode_message(f"{formatted_time} Annonce : {colored_pseudo} a quitté la chatroom {room_number}")
-                    client_writer = CLIENTS[client_id]["w"]
-                    await write_message(client_writer, encoded_message)
+                    CLIENTS[client_id]["w"].write(encoded_message)
+                    await CLIENTS[client_id]["w"].drain()
+                    # client_writer = CLIENTS[client_id]["w"]
+                    # await write_message(client_writer, encoded_message)
             writer.close()
             await writer.wait_closed()
             break
@@ -98,8 +106,10 @@ async def handle_client_msg(reader: asyncio.StreamReader, writer: asyncio.Stream
         for client_id in CLIENTS:
             if client_id != id and CLIENTS[client_id]["connected"] and CLIENTS[client_id]["room"] == room_number:
                 encoded_message = encode_message(f"{formatted_time} {colored_pseudo} a dit : {message}")
-                client_writer = CLIENTS[client_id]["w"]
-                await write_message(client_writer, encoded_message)
+                writer.write(encoded_message)
+                await writer.drain()
+                # client_writer = CLIENTS[client_id]["w"]
+                # await write_message(client_writer, encoded_message)
 
 
 async def main():

@@ -22,7 +22,6 @@ async def read_header(reader: asyncio.StreamReader) -> bytes:
 
 async def read_message(reader: asyncio.StreamReader, header) -> bytes:
     next_bytes_to_read = int.from_bytes(header, byteorder='big')
-    print(next_bytes_to_read)
     if next_bytes_to_read == 1:
         next_bytes_to_read = 2
     message_len = await reader.read(next_bytes_to_read)
